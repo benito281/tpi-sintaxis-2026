@@ -12,7 +12,7 @@ BANNER_PRINCIPAL = r"""
 
             --- MENÚ PRINCIPAL ---
             (1) ❯ Ingresar entrada por teclado
-            (2) ❯ Buscar archivo con el explorador (.txt / .json)
+            (2) ❯ Buscar archivo con el explorador (.txt)
             (3) ❯ Salir
 """
 

@@ -1,12 +1,14 @@
 import os
 import platform
 import tkinter as tk
+from colorama import Fore, init
 from tkinter import filedialog
 from interfaz import *
 
 class Ejecutable:
     def __init__(self):
         self.menu_de_opciones() # Ejecuta ni bien se instancia la clase
+        init() # Ayuda a camb
         
     # Limpia la pantalla ni bien se la llame
     def limpiar_pantalla(self):
@@ -17,7 +19,7 @@ class Ejecutable:
 
     # Ayuda a ingresar los datos o el código por teclado
     def leer_datos_por_teclado(self):
-        print(INSTRUCCIONES) # Muestra el menu de instrucciones por teclado
+        print(Fore.GREEN + INSTRUCCIONES) # Muestra el menu de instrucciones por teclado
         lineas = []
         try:
             while True:
@@ -32,7 +34,7 @@ class Ejecutable:
     def menu_de_opciones(self):
         while True:
             self.limpiar_pantalla()
-            print(BANNER_PRINCIPAL) #Muestra la interfaz de las opciones
+            print(Fore.GREEN+BANNER_PRINCIPAL) #Muestra la interfaz de las opciones
             try:
                 entrada = input("Ingrese un numero para realizar una accion.\n")
                 opcion = int(entrada)
