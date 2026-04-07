@@ -47,7 +47,7 @@ Actualmente ya contamos con una interfaz para el **analizador léxico (lexer)**:
 - Elgani Fleureau, Gabriel
 - Ortiz, Benito de Jesus 
 - Gomez Sanches, Gabriel Nicolas
-- Ruiz Diaz Dario Nahuel 
+- Ruiz Diaz, Dario Nahuel 
 - Bermejo, Gaston Alejandro
 
 
