@@ -76,9 +76,9 @@ Actualmente ya contamos con una interfaz para el **analizador léxico (lexer)**:
 
 ```bash
 
-git clone [https://github.com/tu-usuario/tu-repo.git](https://github.com/tu-usuario/tu-repo.git)
+git clone [https://github.com/tu-usuario/tu-repo.git](https://github.com/benito281/tpi-sintaxis-2026)
 
-cd tu-repo
+cd tpi-sintaxis-2026
 
 python [main.py](http://main.py)
 
