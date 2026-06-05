@@ -86,7 +86,7 @@ class Ejecutable:
         ruta_archivo = filedialog.askopenfilename(
             parent=root,
             title="Elija un archivo",
-            filetypes=[("Textos", "*.txt"), ("SmartHome", "*.smart")]
+            filetypes=[("SmartHome", "*.smart"),("Textos", "*.txt")]
         )
         root.destroy()
         print(ruta_archivo)
