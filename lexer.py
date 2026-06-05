@@ -29,7 +29,7 @@ class LexerTokens:
     t_DOT    = r'\.'
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
-    t_ignore = ' \t'
+    t_ignore = ' \t\n\r'
 
     def t_COMENTARIO(self, t):
         r'//.*'
@@ -92,10 +92,15 @@ class LexerTokens:
         print('\n-> Token específico encontrado: ID_ACTUADOR')
         return t
 
-    def t_ATRIBUTO(self, t): 
+    def t_ATRIBUTO(self, t):
         r'[a-zA-Z][a-zA-Z0-9_]*'
-        t.type = self.reserved.get(t.value.lower(), 'ATRIBUTO')
-        print('\n-> Token específico encontrado: ATRIBUTO o RESERVADA')
+        palabra = t.value.lower()
+        if palabra in self.reserved:
+            t.type = self.reserved[palabra]
+            print(f'\n-> Palabra reservada: {t.value} -> {t.type}')
+        else:
+            t.type = 'ATRIBUTO'
+            print(f'\n-> Token específico encontrado: ATRIBUTO ({t.value})')
         return t
 
     # Manejo de errores.

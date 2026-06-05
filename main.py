@@ -1,7 +1,6 @@
 import os
 import platform
 import tkinter as tk
-from colorama import Fore, init
 from tkinter import filedialog
 from interfaz import *
 from lexer import LexerTokens as tokens
@@ -13,7 +12,6 @@ lexer.build() # Construye el lexer
 class Ejecutable:
     def __init__(self):
         self.menu_de_opciones() # Ejecuta ni bien se instancia la clase
-        init() # Ayuda a cambiar de color las letras de la interfaz
         
     # Limpia la pantalla ni bien se la llame
     def limpiar_pantalla(self):
@@ -24,11 +22,11 @@ class Ejecutable:
 
     # Ayuda a ingresar los datos o el código por teclado
     def leer_datos_por_teclado(self):
-        print(Fore.GREEN + INSTRUCCIONES) # Muestra el menu de instrucciones por teclado
+        print(INSTRUCCIONES) # Muestra el menu de instrucciones por teclado
         lineas = []
         try:
             while True:
-                linea = input(Fore.YELLOW+"Línea: ")
+                linea = input("Línea: ")
                 lineas.append(linea)
         
         except EOFError:
@@ -39,18 +37,14 @@ class Ejecutable:
     def menu_de_opciones(self):
         while True:
             self.limpiar_pantalla()
-            print(Fore.GREEN+BANNER_PRINCIPAL) #Muestra la interfaz de las opciones
+            print(BANNER_PRINCIPAL) #Muestra la interfaz de las opciones
             try:
                 print("Ingrese un numero para realizar una accion.")
-                entrada = input(Fore.YELLOW)
+                entrada = input()
                 opcion = int(entrada)
-                print(Fore.GREEN)
                 if (opcion == 1):
                     self.limpiar_pantalla()
                     codigo_final = self.leer_datos_por_teclado()       # Guardamos lo que el usuario ingreso
-                    print(Fore.GREEN)
-                    #print("\n--- Código capturado con éxito ---")
-                    #print(codigo_final) 
                     lexer.test(codigo_final)
                     input("\nPresione Enter para volver al menú principal...")
 
@@ -70,7 +64,7 @@ class Ejecutable:
 
                 elif (opcion == 3):
                     self.limpiar_pantalla()
-                    print(Fore.GREEN+"\nSaliendo...")
+                    print("\nSaliendo...")
                     break
                 else:
                     self.limpiar_pantalla()

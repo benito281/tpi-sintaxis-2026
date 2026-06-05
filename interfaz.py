@@ -8,7 +8,7 @@ BANNER_PRINCIPAL = r"""
                                __/ |                              
                               |___/                               
 
-                 ⚙️  Analizador Léxico v1.0 ⚙️
+                 ⚙️  Analizador Léxico v1.2 ⚙️
 
             --- MENÚ PRINCIPAL ---
             (1) ❯ Ingresar entrada por teclado
