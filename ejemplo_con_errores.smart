@@ -1,0 +1,44 @@
+
+WHEN sensor_luz < 250lux DO
+    foco_entrada.estado = ON
+    foco_entrada.brillo = 80%
+END
+
+WHEN sensor-luz > 300lux DO
+    foco_patio.estado = OFF
+END
+
+WHEN sensor_movimiento == TRUE DO
+    altavoz_comedor.email = admin@
+END
+
+IF sensor_temp_int > 26°C THEN
+    aire_acondicionado.estado = ON;
+END
+
+IF sensor_humo == TRUE & aire_acondicionado.estado == OFF THEN
+    alarma.estado = ON
+END
+
+EVERY 30m DO
+    IF reloj.hora > 22:00 THEN
+        persiana_sala.posicion = { 0% }
+    END
+END
+
+WHEN sensor_puerta == TRUE DO
+    altavoz_comedor.mensaje = "Puerta abierta, revisar acceso
+END
+
+WHEN sensor_luz < 100lux DO
+    foco_entrada.brillo = $50
+END
+
+IF sensor_gas == TRUE THEN
+    altavoz_comedor.email = @alertas.smart-home.com.ar
+END
+
+IF sensor_humo == TRUE AND alarma.estado == OFF THEN
+    altavoz_comedor.mensaje = "PELIGRO. HUMO DETECTADO"
+    altavoz_comedor.email = bomberos@smart-home.com.ar
+END
