@@ -32,15 +32,12 @@ class LexerTokens:
     }
 
     # tokens.
-  
     tokens = [
         # Sensores 
         'ID_SENS_TEMP', 'ID_SENS_LUZ', 'ID_SENS_HUMEDAD', 'ID_SENS_BOOL',
         # Actuadores 
         'ID_FOCO', 'ID_AIRE', 'ID_PERSIANA', 'ID_CERRADURA',
         'ID_RELOJ', 'ID_ALTAVOZ', 'ID_ALARMA',
-        # Atributo genérico de respaldo (identificador no contemplado)
-        'ATRIBUTO',
         # Literales con unidad 
         'VAL_TEMPERATURA', 'VAL_PORCENTAJE', 'VAL_TIEMPO',
         'VAL_FECHA', 'VAL_HORA', 'VAL_EMAIL', 'VAL_TEXTO',
@@ -208,7 +205,6 @@ class LexerTokens:
         return t
 
     #Controlador de identificador general
-
     def t_IDENTIFICADOR(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         palabra = t.value.lower()
@@ -223,9 +219,11 @@ class LexerTokens:
             t.type = self.atributos[palabra]
             return t
 
-        # 3. Caso de respaldo: identificador no contemplado
-        t.type = 'ATRIBUTO'
-        return t
+        # Mensaje en caso de que encuentre algo fuera de lugar
+        print(f"Error léxico línea {t.lexer.lineno}: identificador "
+              f"desconocido '{t.value}' — no es palabra reservada, "
+              f"atributo, sensor ni actuador válido")
+        return None
 
    
     # Manejo de errores léxicos
@@ -245,7 +243,6 @@ class LexerTokens:
 
 
     # Método de prueba — imprime cada token reconocido
-  
     def test(self, data):
         self.lexer.input(data)
         while True:
