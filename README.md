@@ -28,13 +28,13 @@ Actualmente ya contamos con una interfaz para el **analizador léxico (lexer)**:
 
 ## ⚙️ Estado del proyecto
 
-- 🟡 Gramática → Falta realizar correcciones  
+- 🟢 Gramática → Correcciones hechas. 
 
-- 🟢  Lexer → Terminado
+- 🟢  Lexer → Terminado.
 
-- 🟡 Parser → pendiente  
+- 🟡 Parser → pendiente.  
 
-- 🔴 Integración → pendiente  
+- 🔴 Integración → pendiente.  
 
 ---
 
