@@ -2,7 +2,8 @@ import ply.lex as lex
 
 
 class LexerTokens:
-
+    def __init__(self):
+        self.errores = []
     # Palabras reservadas 
     reserved = {
         'when': 'WHEN', 'do': 'DO', 'end': 'END', 'if': 'IF',
@@ -78,7 +79,8 @@ class LexerTokens:
         r'[a-zA-Z0-9_+\-]+(\.[a-zA-Z0-9_+\-]+)*@+[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}'
 
         if "@@" in t.value:
-            print(f"Error léxico línea {t.lexer.lineno}: email con doble arroba en '{t.value}'")
+            msg = f"Error léxico línea {t.lexer.lineno}: email con doble arroba en '{t.value}'"
+            self.errores.append(msg)
             return None
 
         return t
@@ -232,7 +234,8 @@ class LexerTokens:
         last_cr = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
         line = t.lexer.lineno
         col = t.lexpos if last_cr < 0 else t.lexpos - last_cr - 1
-        print(f"Caracter ilegal '{t.value[0]}' en línea {line}, columna {col}")
+        msg = f"Caracter ilegal '{t.value[0]}' en línea {line}, columna {col}"
+        self.errores.append(msg)
         t.lexer.skip(1)
 
 
