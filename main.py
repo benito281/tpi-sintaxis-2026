@@ -1,244 +1,100 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-from tkinter.scrolledtext import ScrolledText
+from tkinter import messagebox, scrolledtext, filedialog
 import html as htmlutils
 import os
 from parser import SmartHomeParser
 
-class ParserInterfaz:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("ParsingCoders")
-        self.root.geometry("1100x700")
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("TPI UTN FRRE - Smart-Home System - ParsingCoders")
+        self.geometry("850x700") 
+        
         self.ruta_archivo_actual = None
         self.compilador = SmartHomeParser()
-        # Colores
-        self.colores = {
-            "bg_dark": "#1e293b",
-            "primary": "#3b82f6",
-            "danger": "#ef4444",
-            "bg_light": "#ffffff",
-            "border": "#e2e8f0",
-            "invert":"#203243"
-        }
-
-        self.configurar_estilos()
+        
         self.configurar_interfaz()
-    
-    def configurar_estilos(self):
-        self.estilos = ttk.Style()
-        self.estilos.theme_use('clam')
-
-        #Estilos del Header
-        self.estilos.configure("Header.TFrame", background=self.colores["bg_dark"])
-        self.estilos.configure("Header.TLabel", background=self.colores["bg_dark"], foreground="white", font=("Segoe UI", 22, "bold"))
-
-        # Estilos de botones
-        self.estilos.configure("Primary.TButton", background=self.colores["primary"],foreground="white", font=("Segoe UI", 10))
-        self.estilos.configure("Danger.TButton", background=self.colores["danger"], foreground="white", font=("Segoe UI", 10))
-        self.estilos.configure("Invert.TButton", background=self.colores["invert"], foreground="white", font=("Segoe UI", 10))
-
 
     def configurar_interfaz(self):
-        #Header
-        self.header = ttk.Frame(self.root, style="Header.TFrame", padding=15)
-        self.header.pack(fill=tk.X)
-        #Botones
-        self.btn_cargar_archivo = ttk.Button(self.header, text="📂Cargar archivo", style="Invert.TButton", command=self.seleccionar_archivo)
-        self.btn_cargar_archivo.pack(side=tk.RIGHT, padx=5)
+        # Frame para botones superiores
+        btn_frame = tk.Frame(self)
+        btn_frame.pack(pady=10)
 
-        self.btn_parse = ttk.Button(self.header, text="🌐Parsear a HTML ", style="Primary.TButton", command=self.ejecutar_analisis)
-        self.btn_parse.pack(side=tk.RIGHT, padx=5)
+        # Botones de Acción
+        tk.Button(btn_frame, text="📁 CARGAR ARCHIVO", bg="#2980b9", fg="white", 
+                  font=("Arial", 10, "bold"), command=self.cargar_archivo).pack(side=tk.LEFT, padx=10)
+        # Parsear
+        tk.Button(btn_frame, text="🚀 ANALIZAR Y GENERAR DASHBOARD", bg="#d35400", fg="white", 
+                  font=("Arial", 10, "bold"), command=self.run).pack(side=tk.LEFT, padx=10)
 
-        self.btn_limpiar = ttk.Button(self.header, text="🗑️Limpiar ", style="Danger.TButton", command=self.limpiar_editor)
-        self.btn_limpiar.pack(side=tk.RIGHT, padx=5)
-        #Tiulo
-        self.nombre = ttk.Label(self.header, text="SmartHome", style="Header.TLabel")
-        self.nombre.pack(side=tk.LEFT, padx=5)
+        # Limpiar
+        tk.Button(btn_frame, text="🗑️ LIMPIAR", bg="#e74c3c", fg="white", 
+                  font=("Arial", 10, "bold"), command=self.limpiar).pack(side=tk.LEFT, padx=10)
 
-
-        #Editor y preview
-        self.main_container = tk.Frame(self.root, bg=self.colores["border"])
-        self.main_container.pack(fill=tk.BOTH, expand=True, padx=1, pady=1)
-
-        # 
-        self.editor = ScrolledText(self.main_container, font=("Segoe UI", 12), borderwidth=0)
-        self.editor.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-        self.editor.insert(tk.END,"Ingrese las instrucciones")
-
-        self.preview = ScrolledText(self.main_container, font=("Segoe UI", 12), borderwidth=0)
-        self.preview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-    #Busqueda y selección de archivo
-    def seleccionar_archivo(self):
-        ruta_archivo = filedialog.askopenfilename(
-            parent=self.root,
-            title="Elija un archivo",
-            filetypes=[("SmartHome", "*.smart")]
-        )
-        if ruta_archivo:
-            self.ruta_archivo_actual = ruta_archivo
-            try:
-                with open(ruta_archivo, 'r', encoding='utf-8') as file:
-                    instrucciones = file.read()
-                self.editor.delete("1.0", tk.END)
-                self.editor.insert(tk.END, instrucciones)
-                self.preview.delete("1.0", tk.END)
-            except FileNotFoundError:
-                messagebox.showerror("Error", "No se encontró el archivo seleccionado.")
-            except PermissionError:
-                messagebox.showerror("Error", "No tenés permiso para abrir ese archivo.")
-            except OSError as error:
-                messagebox.showerror("Error", f"No se pudo abrir el archivo: {error}")
-    #Limpia el contenido de la pantalla
-    def limpiar_editor(self):
-        self.editor.delete("1.0", tk.END)
-        self.preview.delete("1.0", tk.END)
-        self.ruta_archivo_actual = None
-    
-    def ejecutar_analisis(self):
-        #Limpiar errores previos y consolas
-        codigo = self.editor.get("1.0", tk.END).strip()
-        self.preview.delete("1.0", tk.END)
-        self.compilador._lexer_obj.errores = [] 
+        # Editor de instrucciones
+        tk.Label(self, text="Editor de Código Smart-Home", font=("Arial", 10, "bold")).pack()
+        self.editor = scrolledtext.ScrolledText(self, width=95, height=20, font=("Consolas", 11))
+        self.editor.pack(pady=5)
         
-        if not codigo:
-            messagebox.showwarning("Advertencia", "El editor está vacío.")
+        # Log de errores
+        tk.Label(self, text="Log de Errores / Resultados", font=("Arial", 10, "bold"), fg="#c0392b").pack()
+        self.log = scrolledtext.ScrolledText(self, width=95, height=10, fg="#c0392b", bg="#f9f9f9", font=("Consolas", 10))
+        self.log.pack(pady=5)
+
+    #Limpia el editor y la consola
+    def limpiar(self):
+        self.editor.delete(1.0, tk.END)
+        self.log.delete(1.0, tk.END)
+        self.log.configure(fg="#c0392b") # Restaurar color rojo por defecto
+        self.ruta_archivo_actual = None
+        self.compilador._lexer_obj.errores.clear()
+
+    def cargar_archivo(self):
+        ruta = filedialog.askopenfilename(
+            title="Seleccionar archivo de código Smart-Home",
+            filetypes=(("Archivos Smart", "*.smart"), ("Todos los archivos", ".*"))
+        )
+        if ruta:
+            try:
+                with open(ruta, "r", encoding="utf-8") as f:
+                    contenido = f.read()
+                    self.editor.delete(1.0, tk.END)
+                    self.editor.insert(tk.END, contenido)
+                self.ruta_archivo_actual = ruta
+                messagebox.showinfo("Éxito", f"Archivo cargado: {os.path.basename(ruta)}")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo leer el archivo: {e}")
+
+    def run(self):
+        # Limpieza de log y lexer
+        self.log.delete(1.0, tk.END)
+        self.log.configure(fg="#c0392b") 
+        self.compilador._lexer_obj.errores.clear()
+        
+        entrada = self.editor.get(1.0, tk.END).strip()
+        if not entrada:
+            messagebox.showwarning("Atención", "El editor está vacío.")
             return
 
-        #Ejecutar el parser 
-        ast = self.compilador.analizar(codigo)
+        # Ejecuta el analisis en una pasada
+        html_generado = self.compilador.analizar(entrada)
 
-        #Recopilar todos los errores (Léxicos + Sintácticos)
-        errores_lexicos = self.compilador._lexer_obj.errores
-        errores_sintacticos = self.compilador.errores
-        
-        if errores_lexicos or errores_sintacticos:
-            # Mostrar errores
-            self.preview.insert(tk.END, "❌ SE ENCONTRARON ERRORES:\n\n")
-            for err in errores_lexicos:
-                self.preview.insert(tk.END, f"LÉXICO: {err}\n")
-            for err in errores_sintacticos:
-                self.preview.insert(tk.END, f"SINTÁCTICO: Error en línea {err[0]}: token inesperado '{err[2]}'\n")
-            
-            messagebox.showerror("Error", "El código contiene errores. Revisa el panel derecho.")
+        errores_lex = self.compilador._lexer_obj.errores
+        errores_sin = self.compilador.errores
+
+        if errores_lex or errores_sin:
+            for err in errores_lex:
+                self.log.insert(tk.END, f"❌ [LÉXICO] {err}\n")
+            for err in errores_sin:
+                self.log.insert(tk.END, f"❌ [SINTÁCTICO] Error en L{err[0]}: Token '{err[2]}' inesperado.\n")
+            messagebox.showerror("Error", "Se detectaron errores semánticos o sintácticos (ver log).")
         else:
-            #Mensaje de exito
-            self.preview.insert(tk.END, "✅ Análisis exitoso. Generando HTML...\n")
-            html_generado = self.generar_html_desde_ast(ast)
+            self.log.configure(fg="#27ae60") 
+            self.log.insert(tk.END, "✅ Análisis exitoso. Generando Dashboard HTML...\n")
+            
+            # Se guarda el string devuelto por el parser
             self.guardar_html(html_generado)
-    
-    def generar_html_desde_ast(self, ast):
-        if not ast or ast[0] != 'PROGRAMA_HOME':
-            return ""
 
-        html = [
-            "<!DOCTYPE html>",
-            "<html lang='es'>",
-            "<head>",
-            "  <meta charset='UTF-8'>",
-            "  <title>Reporte de Ejecución SmartHome</title>",
-            "<script src='https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'></script>",
-            "</head>",
-            "<body>",
-            "  <h1>Reporte de Configuración - SmartHome</h1>"
-        ]
-
-        # Desatar la recursión a partir del nivel 1 (lista_instrucciones)
-        html_body = self.recorrer_ast(ast[1])
-        html.append(html_body)
-
-        html.append("</body>\n</html>")
-        return "\n".join(html)
-
-    def recorrer_ast(self, nodo):
-        """
-        Recorre recursivamente los nodos del AST para procesar instrucciones anidadas
-        y aplica el HTML correspondiente según el tipo de nodo.
-        """
-        if not nodo: return ""
-        
-        # Si es una lista, se recorre cada instrucción internamente
-        if isinstance(nodo, list):
-            return "\n".join(self.recorrer_ast(n) for n in nodo)
-            
-        if not isinstance(nodo, tuple): return ""
-
-        tipo = nodo[0]
-        html_salida = ""
-
-        # BLOQUES ANIDADOS (IF, WHEN, EVERY)
-
-        if tipo in ('BLOQUE_CUANDO', 'BLOQUE_CADA'):
-            html_salida += self.recorrer_ast(nodo[1]) 
-            html_salida += self.recorrer_ast(nodo[2]) 
-        elif tipo == 'CONDICIONAL':
-            html_salida += self.recorrer_ast(nodo[1])
-            html_salida += self.recorrer_ast(nodo[2])
-            if len(nodo) > 3 and nodo[3]: # ELSE
-                html_salida += self.recorrer_ast(nodo[3])
-        elif tipo in ('AND', 'OR', 'NOT'):
-            html_salida += self.recorrer_ast(nodo[1])
-            if len(nodo) > 2:
-                html_salida += self.recorrer_ast(nodo[2])
-
-  
-        # SENSORES
- 
-        elif tipo.startswith('COMP_'):
-            # Caso 1: La tupla tiene 5 elementos (Ej: COMP_BOOL_ESTADO, COMP_TIEMPO, COMP_FECHA)
-     
-            if len(nodo) == 5:
-                sensor = f"{nodo[1]}.{nodo[2]}"
-                operador = htmlutils.escape(str(nodo[3]))
-                valor = htmlutils.escape(str(nodo[4]))
-                
-            # Caso 2: La tupla tiene 4 elementos (Ej: COMP_LUX, COMP_TEMP, COMP_BOOL_SENSOR)
-           
-            elif len(nodo) == 4:
-                if isinstance(nodo[1], tuple) and nodo[1][0] == 'ATTR':
-                    # Es una tupla de atributo anidada
-                    sensor = f"{nodo[1][1]}.{nodo[1][2]}"
-                else:
-                    sensor = str(nodo[1])
-                operador = htmlutils.escape(str(nodo[2]))
-                valor = htmlutils.escape(str(nodo[3]))
-            else:
-                return "" # Fallback por seguridad
-
-            html_salida += f'  <div style="border: 1px solid green; padding: 20px; margin-bottom: 10px;">\n'
-            html_salida += f'    <span>{sensor}</span> {operador} {valor}\n'
-            html_salida += f'  </div>\n'
-
-        
-        # ACTUADORES
-        
-        elif tipo.startswith('ASIG_'): 
-            id_actuador = str(nodo[1])
-            
-            if tipo == 'ASIG_ESTADO':
-                atributo = str(nodo[2])
-                valor = str(nodo[3])
-            elif tipo == 'ASIG_EMAIL_NOTIF':
-                atributo = 'email_notif'
-                valor = str(nodo[2])
-            else:
-                atributo = tipo.replace('ASIG_', '').lower()
-                valor = str(nodo[2])
-
-            html_salida += f'  <div style="border: 1px solid gray; padding: 20px; margin-bottom: 10px;">\n'
-            html_salida += f'    <h3>{id_actuador}</h3>\n'
-            html_salida += f'    <ul>\n'
-            
-            if tipo == 'ASIG_EMAIL_NOTIF':
-                html_salida += f'      <li>{atributo}: <a href="mailto:{valor}">Contactar a {valor}</a></li>\n'
-            else:
-                html_salida += f'      <li>{atributo}: {valor}</li>\n'
-            
-            html_salida += f'    </ul>\n'
-            html_salida += f'  </div>\n'
-
-        return html_salida
-    
     def guardar_html(self, html_content):
         if not self.ruta_archivo_actual:
             ruta = filedialog.asksaveasfilename(
@@ -249,25 +105,21 @@ class ParserInterfaz:
             if not ruta: return
             self.ruta_archivo_actual = ruta
 
-        # Cambio de extensión a .html
         output_path = os.path.splitext(self.ruta_archivo_actual)[0] + ".html"
         
         try:
             with open(output_path, 'w', encoding='utf-8') as file:
                 file.write(html_content)
             
-            # Imprimir resultado y HTML en el preview
-            self.preview.insert(tk.END, f"\n📁 ¡Archivo HTML guardado con éxito en:\n{output_path}\n\n")
-            self.preview.insert(tk.END, "="*40 + "\n")
-            self.preview.insert(tk.END, "CÓDIGO HTML GENERADO:\n")
-            self.preview.insert(tk.END, "="*40 + "\n\n")
-            self.preview.insert(tk.END, html_content)
+            self.log.insert(tk.END, f"📁 ¡Dashboard HTML guardado con éxito en:\n{output_path}\n")
+            messagebox.showinfo("Éxito", "Análisis finalizado sin errores. Dashboard generado correctamente.")
 
-        except Exception as e:
-            self.preview.insert(tk.END, f"\n❌ Error al guardar el archivo: {e}")
-            messagebox.showerror("Error de E/S", f"No se pudo guardar el HTML:\n{e}")
+        except IOError as e:
+            error_msg = f"Error de Sistema: No se pudo escribir '{os.path.basename(output_path)}'. Asegúrese de que no esté abierto en el navegador. ({e})"
+            self.log.configure(fg="#c0392b")
+            self.log.insert(tk.END, f"\n❌ {error_msg}")
+            messagebox.showerror("Error de E/S", error_msg)
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = ParserInterfaz(root)
-    root.mainloop()
+    app = App()
+    app.mainloop()

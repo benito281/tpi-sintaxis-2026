@@ -1,9 +1,9 @@
 import ply.lex as lex
 
+
 class LexerTokens:
     def __init__(self):
         self.errores = []
-        
     # Palabras reservadas 
     reserved = {
         'when': 'WHEN', 'do': 'DO', 'end': 'END', 'if': 'IF',
@@ -42,13 +42,14 @@ class LexerTokens:
         # Literales con unidad 
         'VAL_TEMPERATURA', 'VAL_PORCENTAJE', 'VAL_TIEMPO',
         'VAL_FECHA', 'VAL_HORA', 'VAL_EMAIL', 'VAL_TEXTO',
-        'VAL_LUX',
+        'VAL_LUX', 'NUM',
         # Operadores y puntuación
         'EQ', 'NEQ', 'GT', 'LT', 'GTE', 'LTE', 'ASSIGN', 'DOT',
         'LPAREN', 'RPAREN',
     ] + list(set(atributos.values())) + list(reserved.values())
 
     # Operadores y delimitadores simples
+  
     t_EQ     = r'=='
     t_NEQ    = r'!='
     t_GTE    = r'>='
@@ -61,36 +62,40 @@ class LexerTokens:
     t_RPAREN = r'\)'
     t_ignore = ' \t\r'
 
+  
     # Comentarios 
     def t_COMENTARIO(self, t):
         r'/\*[\s\S]*?\*/|//[^\n]*|@[^\n]*'
         t.lexer.lineno += t.value.count('\n')
         pass
-        
     # Salto de linea
     def t_newline(self, t):
         r'\n+'
         t.lexer.lineno += len(t.value)
 
+
+
     def t_VAL_EMAIL(self, t):
         r'[a-zA-Z0-9_+\-]+(\.[a-zA-Z0-9_+\-]+)*@+[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,4}'
+
         if "@@" in t.value:
             msg = f"Error léxico línea {t.lexer.lineno}: email con doble arroba en '{t.value}'"
             self.errores.append(msg)
             return None
+
         return t
 
     def t_VAL_FECHA(self, t):
         r'\d{1,2}/\d{1,2}/\d{4}'
         dia, mes, anio = (int(x) for x in t.value.split('/'))
         if not (1 <= dia <= 31):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: día fuera de rango (1-31) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: día fuera de rango (1-31) en '{t.value}'")
             return None
         if not (1 <= mes <= 12):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: mes fuera de rango (1-12) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: mes fuera de rango (1-12) en '{t.value}'")
             return None
         if not (1900 <= anio <= 2099):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: año fuera de rango (1900-2099) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: año fuera de rango (1900-2099) en '{t.value}'")
             return None
         return t
 
@@ -98,34 +103,34 @@ class LexerTokens:
         r'\d{2}:\d{2}'
         hh, mm = (int(x) for x in t.value.split(':'))
         if not (0 <= hh <= 23):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: hora fuera de rango (00-23) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: hora fuera de rango (00-23) en '{t.value}'")
             return None
         if not (0 <= mm <= 59):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: minutos fuera de rango (00-59) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: minutos fuera de rango (00-59) en '{t.value}'")
             return None
         return t
 
     def t_VAL_TEMPERATURA(self, t):
         r'-?\d+(\.\d+)?°[Cc]'
-        valor = float(t.value[:-2])  
+        valor = float(t.value[:-2])  # quita °C
         if not (-10 <= valor <= 50):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: temperatura fuera de rango (-10 a 50) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: temperatura fuera de rango (-10 a 50) en '{t.value}'")
             return None
         return t
 
     def t_VAL_PORCENTAJE(self, t):
         r'\d{1,3}%'
-        valor = int(t.value[:-1]) 
+        valor = int(t.value[:-1])  # quita %
         if not (0 <= valor <= 100):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: porcentaje fuera de rango (0-100) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: porcentaje fuera de rango (0-100) en '{t.value}'")
             return None
         return t
 
     def t_VAL_LUX(self, t):
         r'\d+lux'
-        valor = int(t.value[:-3])
+        valor = int(t.value[:-3])  # quita 'lux'
         if not (0 <= valor <= 1000):
-            self.errores.append(f"Error léxico línea {t.lexer.lineno}: lux fuera de rango (0-1000) en '{t.value}'")
+            print(f"Error léxico línea {t.lexer.lineno}: lux fuera de rango (0-1000) en '{t.value}'")
             return None
         return t
 
@@ -142,6 +147,7 @@ class LexerTokens:
         r'\d+'
         t.value = int(t.value)
         return t
+
 
     # Sensores
     def t_ID_SENS_TEMP(self, t):
@@ -200,29 +206,30 @@ class LexerTokens:
         t.value = t.value.lower()
         return t
 
-    # Controlador de identificador general
+    #Controlador de identificador general
     def t_IDENTIFICADOR(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         palabra = t.value.lower()
 
-        # Verifica si es una palabra reseravada 
+        # 1. ¿Es palabra reservada?
         if palabra in self.reserved:
             t.type = self.reserved[palabra]
             return t
 
-        # Verifica si son identificadores propios del escenario
+        # 2. ¿Es un atributo conocido del dominio?
         if palabra in self.atributos:
             t.type = self.atributos[palabra]
             return t
 
-        # Se capturan identificadores que no estan contemplados
-        msg = (f"Error léxico línea {t.lexer.lineno}: identificador "
-               f"desconocido '{t.value}' — no es palabra reservada, "
-               f"atributo, sensor ni actuador válido")
-        self.errores.append(msg)
+        # Mensaje en caso de que encuentre algo fuera de lugar
+        print(f"Error léxico línea {t.lexer.lineno}: identificador "
+              f"desconocido '{t.value}' — no es palabra reservada, "
+              f"atributo, sensor ni actuador válido")
         return None
+
    
-    # Manejo de errores del lecer
+    # Manejo de errores léxicos
+
     def t_error(self, t):
         last_cr = t.lexer.lexdata.rfind('\n', 0, t.lexpos)
         line = t.lexer.lineno
@@ -231,10 +238,14 @@ class LexerTokens:
         self.errores.append(msg)
         t.lexer.skip(1)
 
+
     # Construcción del lexer
+
     def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
 
+
+    # Método de prueba — imprime cada token reconocido
     def test(self, data):
         self.lexer.input(data)
         while True:
