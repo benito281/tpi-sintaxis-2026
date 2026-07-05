@@ -11,22 +11,12 @@ class SmartHomeParser:
         self.errores = []
         self.parser = yacc.yacc(module=self, debug=False, write_tables=False)
 
-    # =================================================================
-    # SÍMBOLO INICIAL
-    # PROGRAMA_HOME → LIST_INSTRUCCIONES
-    # =================================================================
-
+    # PROGRAMA_HOME(Sigma) 
     def p_programa_home(self, p):
         '''programa_home : list_instrucciones'''
         p[0] = ('PROGRAMA_HOME', p[1])
 
-    # =================================================================
-    # SECUENCIA DE INSTRUCCIONES
-    # LIST_INSTRUCCIONES → LIST_INSTRUCCIONES INSTRUCCION | INSTRUCCION
-    # La recursión por izquierda permite encadenar instrucciones sin
-    # límite, y es la forma eficiente para parsers LALR como ply.yacc.
-    # =================================================================
-
+    # Listas de instrucciones
     def p_list_instrucciones_multiple(self, p):
         '''list_instrucciones : list_instrucciones instruccion'''
         p[0] = p[1] + [p[2]]
@@ -35,11 +25,7 @@ class SmartHomeParser:
         '''list_instrucciones : instruccion'''
         p[0] = [p[1]]
 
-    # =================================================================
-    # TIPOS DE INSTRUCCIÓN
-    # INSTRUCCION → ASIGNACION | BLOQUE_CUANDO | BLOQUE_CADA | CONDICIONAL
-    # =================================================================
-
+    # Tipos de instruccion
     def p_instruccion(self, p):
         '''instruccion : asignacion
                        | bloque_cuando
@@ -47,10 +33,7 @@ class SmartHomeParser:
                        | condicional'''
         p[0] = p[1]
 
-    # =================================================================
-    # BLOQUES DE CONTROL
-    # =================================================================
-
+    # Bloques de control
     def p_bloque_cuando(self, p):
         '''bloque_cuando : WHEN condicion DO list_instrucciones END'''
         p[0] = ('BLOQUE_CUANDO', p[2], p[4])
@@ -67,14 +50,7 @@ class SmartHomeParser:
         '''condicional : IF condicion THEN list_instrucciones END'''
         p[0] = ('CONDICIONAL', p[2], p[4], None)
 
-    # =================================================================
-    # LÓGICA DE CONDICIONES
-    # Precedencia: NOT > AND > OR  (la jerarquía la dan las producciones)
-    # CONDICION   → TER_LOGICO | CONDICION OR TER_LOGICO
-    # TER_LOGICO  → FAC_LOGICO | TER_LOGICO AND FAC_LOGICO
-    # FAC_LOGICO  → NOT FAC_LOGICO | "(" CONDICION ")" | COMPARACION
-    # =================================================================
-
+    # Condiciones
     def p_condicion_or(self, p):
         '''condicion : condicion OR ter_logico'''
         p[0] = ('OR', p[1], p[3])
@@ -103,13 +79,7 @@ class SmartHomeParser:
         '''fac_logico : comparacion'''
         p[0] = p[1]
 
-    # =================================================================
-    # ASIGNACIONES — desglosadas por tipo de dato compatible.
-    # Cada producción fuerza qué dispositivo puede ir con qué atributo
-    # y qué tipo de valor, evitando combinaciones semánticamente inválidas
-    # ya desde el nivel sintáctico.
-    # =================================================================
-
+    # Asignaciones
     def p_asignacion(self, p):
         '''asignacion : asig_estado
                       | asig_porcent
@@ -120,10 +90,7 @@ class SmartHomeParser:
                       | asig_email'''
         p[0] = p[1]
 
-    # --- ESTADO (ON/OFF) ---
-    # Expandido directamente por cada actuador para evitar el conflicto
-    # LALR que genera id_estado_rw como no-terminal intermedio: el parser
-    # no puede reducir ID_FOCO a id_estado_rw antes de ver el DOT.
+    # Estado
     def p_asig_estado(self, p):
         '''asig_estado : ID_FOCO      DOT ATTR_ESTADO   ASSIGN valor_estado
                        | ID_AIRE      DOT ATTR_ESTADO   ASSIGN valor_estado
@@ -133,7 +100,7 @@ class SmartHomeParser:
                        | ID_ALTAVOZ   DOT ATTR_MUTE     ASSIGN valor_estado'''
         p[0] = ('ASIG_ESTADO', p[1], p[3], p[5])
 
-    # id_estado_rw se mantiene solo para exp_estado (comparaciones)
+    # id_estado_rw para escritura/lectura
     def p_id_estado_rw(self, p):
         '''id_estado_rw : ID_FOCO
                         | ID_AIRE
@@ -141,7 +108,7 @@ class SmartHomeParser:
                         | ID_ALARMA'''
         p[0] = p[1]
 
-    # --- PORCENTAJE ---
+    # Porcentaje
     def p_asig_porcent_brillo(self, p):
         '''asig_porcent : ID_FOCO DOT ATTR_BRILLO ASSIGN VAL_PORCENTAJE'''
         p[0] = ('ASIG_BRILLO', p[1], p[5])
@@ -154,37 +121,32 @@ class SmartHomeParser:
         '''asig_porcent : ID_ALTAVOZ DOT ATTR_VOLUMEN ASSIGN VAL_PORCENTAJE'''
         p[0] = ('ASIG_VOLUMEN', p[1], p[5])
 
-    # --- TEMPERATURA (solo temp_obj es de escritura) ---
+    # Temperatura
     def p_asig_temp(self, p):
         '''asig_temp : ID_AIRE DOT ATTR_TEMP_OBJ ASSIGN VAL_TEMPERATURA'''
         p[0] = ('ASIG_TEMP_OBJ', p[1], p[5])
 
-    # --- COLOR (conjunto cerrado: blanco, rojo, azul) ---
+    # Color
     def p_asig_color(self, p):
         '''asig_color : ID_FOCO DOT ATTR_COLOR ASSIGN valor_color'''
         p[0] = ('ASIG_COLOR', p[1], p[5])
 
-    # --- MODO (conjunto cerrado: frio, calor, vent) ---
+    # Modo
     def p_asig_modo(self, p):
         '''asig_modo : ID_AIRE DOT ATTR_MODO ASSIGN valor_modo'''
         p[0] = ('ASIG_MODO', p[1], p[5])
 
-    # --- TEXTO ---
+    # Texto
     def p_asig_texto(self, p):
         '''asig_texto : ID_ALTAVOZ DOT ATTR_MENSAJE ASSIGN VAL_TEXTO'''
         p[0] = ('ASIG_MENSAJE', p[1], p[5])
 
-    # --- EMAIL ---
+    # Email
     def p_asig_email(self, p):
         '''asig_email : ID_ALTAVOZ DOT ATTR_EMAIL_NOTIF ASSIGN VAL_EMAIL'''
         p[0] = ('ASIG_EMAIL_NOTIF', p[1], p[5])
 
-    # =================================================================
-    # COMPARACIONES — desglosadas por tipo de dato compatible.
-    # Esto impide comparar, por ejemplo, un sensor de lux con un
-    # VAL_TEMPERATURA, o un sensor booleano con ON/OFF (que es
-    # vocabulario de actuadores, no de sensores).
-    # =================================================================
+    # Comparaciones
 
     def p_comparacion(self, p):
         '''comparacion : comp_temp
@@ -195,7 +157,7 @@ class SmartHomeParser:
                        | comp_fecha'''
         p[0] = p[1]
 
-    # --- TEMPERATURA ---
+    # Temperatura
     def p_comp_temp(self, p):
         '''comp_temp : exp_temp op_comp VAL_TEMPERATURA'''
         p[0] = ('COMP_TEMP', p[1], p[2], p[3])
@@ -212,12 +174,12 @@ class SmartHomeParser:
         '''exp_temp : ID_AIRE DOT ATTR_TEMP_OBJ'''
         p[0] = ('ATTR', p[1], p[3])
 
-    # --- ILUMINANCIA ---
+    # Iluminancia
     def p_comp_lux(self, p):
         '''comp_lux : ID_SENS_LUZ op_comp VAL_LUX'''
         p[0] = ('COMP_LUX', p[1], p[2], p[3])
 
-    # --- PORCENTAJE ---
+    # Porcentaje
     def p_comp_porcent(self, p):
         '''comp_porcent : exp_porcent op_comp VAL_PORCENTAJE'''
         p[0] = ('COMP_PORCENT', p[1], p[2], p[3])
@@ -238,16 +200,13 @@ class SmartHomeParser:
         '''exp_porcent : ID_SENS_HUMEDAD'''
         p[0] = p[1]
 
-    # --- BOOLEANOS ---
-    # Sensor booleano compara SOLO contra TRUE/FALSE (valor_sensor_bool)
-    # Actuador con .estado compara SOLO contra ON/OFF (valor_estado)
+    # Booleanos
     def p_comp_bool_sensor(self, p):
         '''comp_bool : ID_SENS_BOOL EQ valor_sensor_bool
                      | ID_SENS_BOOL NEQ valor_sensor_bool'''
         p[0] = ('COMP_BOOL_SENSOR', p[1], p[2], p[3])
 
-    # comp_bool para actuadores: expandido directamente para evitar
-    # el mismo conflicto LALR que teniamos en asig_estado.
+    # comp_bool para actuadores
     def p_comp_bool_estado(self, p):
         '''comp_bool : ID_FOCO      DOT ATTR_ESTADO   EQ  valor_estado
                      | ID_FOCO      DOT ATTR_ESTADO   NEQ valor_estado
@@ -263,20 +222,17 @@ class SmartHomeParser:
                      | ID_ALTAVOZ   DOT ATTR_MUTE     NEQ valor_estado'''
         p[0] = ('COMP_BOOL_ESTADO', p[1], p[3], p[4], p[5])
 
-    # --- TIEMPO (reloj) ---
+    # Tiempo
     def p_comp_tiempo(self, p):
         '''comp_tiempo : ID_RELOJ DOT ATTR_HORA op_comp VAL_HORA'''
         p[0] = ('COMP_TIEMPO', p[1], p[4], p[5])
 
-    # --- FECHA ---
+    # Fecha
     def p_comp_fecha(self, p):
         '''comp_fecha : ID_RELOJ DOT ATTR_FECHA op_comp VAL_FECHA'''
         p[0] = ('COMP_FECHA', p[1], p[4], p[5])
 
-    # =================================================================
-    # OPERADORES DE COMPARACIÓN
-    # op_comp → == | != | > | < | >= | <=
-    # =================================================================
+    #Operadores
 
     def p_op_comp(self, p):
         '''op_comp : EQ
@@ -287,12 +243,7 @@ class SmartHomeParser:
                    | LTE'''
         p[0] = p[1]
 
-    # =================================================================
-    # VALORES ENUMERADOS — conjuntos cerrados.
-    # Al usar tokens específicos (ON, OFF, TRUE, FALSE, BLANCO, etc.)
-    # el parser rechaza cualquier otra palabra automáticamente, porque
-    # el lexer nunca la emitiría como uno de esos tokens.
-    # =================================================================
+    # valores enumerados
 
     def p_valor_estado(self, p):
         '''valor_estado : ON
@@ -316,9 +267,7 @@ class SmartHomeParser:
                       | VENT'''
         p[0] = p[1]
 
-    # =================================================================
-    # ERROR SINTÁCTICO
-    # =================================================================
+    # Error sintactico
 
     def p_error(self, p):
         if p:
@@ -329,9 +278,7 @@ class SmartHomeParser:
             print("Error sintáctico: fin de archivo inesperado")
             self.errores.append((None, None, 'EOF'))
 
-    # =================================================================
-    # MÉTODO PÚBLICO DE ANÁLISIS
-    # =================================================================
+    
 
     def analizar(self, codigo):
         self.errores = []
