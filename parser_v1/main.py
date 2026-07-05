@@ -186,14 +186,12 @@ class ParserInterfaz:
  
         elif tipo.startswith('COMP_'):
             # Caso 1: La tupla tiene 5 elementos (Ej: COMP_BOOL_ESTADO, COMP_TIEMPO, COMP_FECHA)
-     
             if len(nodo) == 5:
                 sensor = f"{nodo[1]}.{nodo[2]}"
                 operador = htmlutils.escape(str(nodo[3]))
                 valor = htmlutils.escape(str(nodo[4]))
                 
             # Caso 2: La tupla tiene 4 elementos (Ej: COMP_LUX, COMP_TEMP, COMP_BOOL_SENSOR)
-           
             elif len(nodo) == 4:
                 if isinstance(nodo[1], tuple) and nodo[1][0] == 'ATTR':
                     # Es una tupla de atributo anidada
