@@ -32,9 +32,9 @@ Actualmente ya contamos con una interfaz para el **analizador léxico (lexer)**:
 
 - 🟢  Lexer → Terminado.
 
-- 🟡 Parser → pendiente.  
+- 🟢 Parser → pendiente.  
 
-- 🔴 Integración → pendiente.  
+- 🟢 Integración → pendiente.  
 
 ---
 
