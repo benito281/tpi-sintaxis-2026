@@ -80,7 +80,7 @@ git clone https://github.com/benito281/tpi-sintaxis-2026
 
 cd tpi-sintaxis-2026
 
-python [main.py](http://main.py)
+python main.py
 
 ```
 
@@ -128,7 +128,7 @@ Con el venv activado y estando en la carpeta del proyecto:
 
 pyinstaller --clean main.spec
 
-(Si no usás .spec: pyinstaller --onefile [main.py](http://main.py) y ajustá nombre/icono según necesites.)
+(Si no usás .spec: pyinstaller --onefile main.py y ajustá nombre/icono según necesites.)
 
 ```
 
