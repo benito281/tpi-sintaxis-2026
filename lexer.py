@@ -138,11 +138,6 @@ class LexerTokens:
         t.value = t.value[1:-1]
         return t
 
-    def t_NUM(self, t):
-        r'\d+'
-        t.value = int(t.value)
-        return t
-
     # Sensores
     def t_ID_SENS_TEMP(self, t):
         r'(?i:sensor_temp[a-zA-Z0-9_]*)'
