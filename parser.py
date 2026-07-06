@@ -101,19 +101,30 @@ class SmartHomeParser:
         p[0] = p[1]
 
     def construir_div_actuador(self, id_actuador, atributo, valor, es_email=False):
-       
         html = f"""
-  <div style='border: 1px solid grey; padding: 20px; margin-bottom: 10px; border-radius: 5px;'>
-    <h2>Dispositivo: {id_actuador}</h2>
-    <ul>"""
+  <div style='background: #ffffff; border: 1px solid #d1d5db; padding: 20px; margin-bottom: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-family: sans-serif;'>
+    <h3 style='margin: 0 0 10px 0; color: #374151; font-size: 1.2em;'>
+        Dispositivo: <span style='color: #2563eb;'>{id_actuador}</span>
+    </h3>
+    <ul style='list-style: none; padding-left: 0; margin: 0;'>"""
+        
         if es_email:
             nombre = str(valor).split('@')[0]
-            html += f"\n      <li>{atributo}: <a href='mailto:{valor}'>Contactar a {nombre}</a></li>"
+            html += f"\n      <li style='padding: 5px 0; color: #4b5563;'>{atributo}: <a href='mailto:{valor}' style='color: #3b82f6; text-decoration: none;'>Contactar a {nombre}</a></li>"
         else:
-            html += f"\n      <li>{atributo}: <b>{valor}</b></li>"
+            html += f"\n      <li style='padding: 5px 0; color: #4b5563;'>{atributo}: <b style='color: #111827;'>{valor}</b></li>"
         
         html += "\n    </ul>\n  </div>"
         return html
+
+    def construir_div_sensor(self, sensor, operador, valor):
+        return f"""
+  <div style='background: #f0fdf4; border: 1px solid #22c55e; padding: 20px; margin-bottom: 20px; border-radius: 10px; font-family: sans-serif;'>
+    <p style='margin: 0; color: #065f46; font-size: 1.1em;'>
+        Sensor: <span style='font-weight: bold; color: #064e3b;'>{sensor}</span> evaluado con: 
+        <span style='background: #dcfce7; padding: 2px 6px; border-radius: 4px;'>{htmlutils.escape(str(operador))} {htmlutils.escape(str(valor))}</span>
+    </p>
+  </div>"""
 
     def p_asig_estado(self, p):
         '''asig_estado : ID_FOCO      DOT ATTR_ESTADO   ASSIGN valor_estado
@@ -166,11 +177,7 @@ class SmartHomeParser:
                        | comp_fecha'''
         p[0] = p[1]
 
-    def construir_div_sensor(self, sensor, operador, valor):
-        return f"""
-        <div style='border: 1px solid green; padding: 20px; margin-bottom: 20px;'>
-            <h3 style='color: green;'><span>{sensor}</span>: {htmlutils.escape(str(operador))} {htmlutils.escape(str(valor))}</h3>
-        </div>"""
+   
 
     def p_comp_temp(self, p):
         '''comp_temp : exp_temp op_comp VAL_TEMPERATURA'''
